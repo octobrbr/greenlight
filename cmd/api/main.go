@@ -51,7 +51,7 @@ func main() {
 	// default to using the port number 4000 and the environment "development" if no
 	// corresponding flags are provided.
 	flag.IntVar(&cfg.port, "port", 4000, "Api server port")
-	flag.StringVar(&cfg.env, "env", "development", "Environment (devolopment|staging|production)")
+	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 
 	// Read the DSN value from the db-dsn command-line flag into the config struct. We
 	// default to using our development DSN if no flag is provided.
