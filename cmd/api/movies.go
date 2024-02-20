@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"greenlight.brannon.net/internal/data"
 	"greenlight.brannon.net/internal/validator"
@@ -107,6 +108,15 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 			app.serverErrorResponse(w, r, err)
 		}
 		return
+	}
+
+	// If the request contains a X-Expected-Version header, verify that the movie
+	// version in the database matches the expected version specified in the header.
+	if r.Header.Get("X-Expected-Version") != "" {
+		if strconv.FormatInt(int64(movie.Version), 32) != r.Header.Get("X-Expected-VErsion") {
+			app.editConflictResponse(w, r)
+			return
+		}
 	}
 
 	// Use pointers for the Title, Year and Runtime fields
