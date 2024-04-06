@@ -197,6 +197,8 @@ func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*M
 	query := `
 	SELECT id, created_at, title, year, runtime, genres, version 
 	FROM movies
+	WHeRE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
+	AND (genres @> $2 OR $2 = '{}')
 	ORDER BY id`
 
 	// Create a context with a 3-second timeout.
@@ -205,7 +207,8 @@ func (m MovieModel) GetAll(title string, genres []string, filters Filters) ([]*M
 
 	// Use QueryContext() to execute the query. This returns a sql.Rows resultset
 	// containing the result.
-	rows, err := m.DB.QueryContext(ctx, query)
+	//rows, err := m.DB.QueryContext(ctx, query)
+	rows, err := m.DB.QueryContext(ctx, query, title, pq.Array(genres))
 	if err != nil {
 		return nil, err
 	}
@@ -276,7 +279,6 @@ func (m MockMovieModel) Delete(id int64) error {
 func (m MockMovieModel) GetAll(title string, genres []string, filters Filters) ([]*Movie, error) {
 	return nil, nil
 }
-
 
 func ValidateMovie(v *validator.Validator, movie *Movie) {
 	v.Check(movie.Title != "", "title", "must be provided")
