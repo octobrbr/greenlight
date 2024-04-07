@@ -1,6 +1,11 @@
 package data
 
-import "greenlight.brannon.net/internal/validator"
+import (
+	"math"
+	"strings"
+
+	"greenlight.brannon.net/internal/validator"
+)
 
 type Filters struct {
 	Page         int
@@ -9,7 +14,15 @@ type Filters struct {
 	SortSafelist []string
 }
 
-func ValidateFilters(v * validator.Validator, f Filters) {
+type Metadata struct {
+	CurrentPage  int `json:"current_page,omitempty"`
+	PageSize     int `json:"page_size,omitempty"`
+	FirstPage    int `json:"first_page,omitempty"`
+	LastPage     int `json:"last_page,omitempty"`
+	TotalRecords int `json:"total_records,omitempty"`
+}
+
+func ValidateFilters(v *validator.Validator, f Filters) {
 	// Check that the page and page_size parameters contain sensible values.
 	v.Check(f.Page > 0, "page", "must be greater than zero")
 	v.Check(f.Page <= 10_000_000, "page", "must be a maximum of 10 million")
@@ -18,4 +31,49 @@ func ValidateFilters(v * validator.Validator, f Filters) {
 
 	// Check that the sort parameter matches a value in the safelist.
 	v.Check(validator.In(f.Sort, f.SortSafelist...), "sort", "invalid sort value")
+}
+
+// Check that the client-provided Sort field matches one of the entries in our safelist
+// and if it does, extract the column name from the Sort field by stripping the leading
+// hyphen character (if one exists).
+func (f Filters) sortColumn() string {
+	for _, safeValue := range f.SortSafelist {
+		if f.Sort == safeValue {
+			return strings.TrimPrefix(f.Sort, "-")
+		}
+	}
+
+	panic("unsafe sort parameter: " + f.Sort)
+}
+
+// Return the sort direction ("ASC" or "DESC") depending on the prefix character of the
+// Sort field.
+func (f Filters) sortDirection() string {
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+
+	return "ASC"
+}
+
+func (f Filters) limit() int {
+	return f.PageSize
+}
+
+func (f Filters) offset() int {
+	return (f.Page - 1) * f.PageSize
+}
+
+func calculateMetadata(totalRecords, page, pageSize int) Metadata {
+	if totalRecords == 0 {
+		return Metadata{}
+	}
+
+	return Metadata{
+		CurrentPage:  page,
+		PageSize:     pageSize,
+		FirstPage:    1,
+		LastPage:     int(math.Ceil(float64(totalRecords) / float64(pageSize))),
+		TotalRecords: totalRecords,
+	}
 }
