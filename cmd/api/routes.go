@@ -6,7 +6,9 @@ import (
 	"github.com/julienschmidt/httprouter"
 )
 
-func (app *application) routes() *httprouter.Router {
+// Update the routes() method to return a http.Handler instead of a *httprouter.Router.
+func (app *application) routes() http.Handler {
+//func (app *application) routes() *httprouter.Router {
 	// Initialize a new httprouter router instance.
 	router := httprouter.New()
 
@@ -32,5 +34,5 @@ func (app *application) routes() *httprouter.Router {
 	// Add the route for the DELETE /v1/movies/:id endpoint.
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
 
-	return router
+	return app.recoverPanic(router)
 }
