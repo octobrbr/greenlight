@@ -65,15 +65,30 @@ func (app *application) registerUserHandler(w http.ResponseWriter, r *http.Reque
 		return
 	}
 
-	go func ()  {
+	// // Launch a background goroutine to send the welcome email.
+	// go func() {
+	// 	// Run a deferred function which uses recover() to catch any panic, and log an
+	// 	// error message instead of terminating the application.
+	// 	defer func() {
+	// 		if err := recover(); err != nil {
+	// 			app.logger.PrintError(fmt.Errorf("%s", err), nil)
+	// 		}
+	// 	}()
+
+	// 	// Send the welcome email.
+	// 	err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
+	// 	if err != nil {
+	// 		app.logger.PrintError(err, nil)
+	// 	}
+	// }()
+
+	app.background(func() {
 		err = app.mailer.Send(user.Email, "user_welcome.tmpl", user)
 		if err != nil {
-			// app.serverErrorResponse(w, r, err)
-			// return
 			app.logger.PrintError(err, nil)
-		}		
-	}()
-	
+		}
+	})
+
 	// Write a JSON response containing the user data along with a 201 Created status
 	// code.
 	err = app.writeJSON(w, http.StatusAccepted, envelope{"user": user}, nil)
