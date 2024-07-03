@@ -19,7 +19,7 @@ type Token struct {
 	Plaintext string
 	Hash      []byte
 	UserID    int64
-	Expire    time.Time
+	Expiry    time.Time
 	Scope     string
 }
 
@@ -29,7 +29,7 @@ func generateToken(UserID int64, ttl time.Duration, scope string) (*Token, error
 	// current time to get the expiry time?
 	token := &Token{
 		UserID: UserID,
-		Expire: time.Now().Add(ttl),
+		Expiry: time.Now().Add(ttl),
 		Scope:  scope,
 	}
 
@@ -92,10 +92,10 @@ func (m TokenModel) New(UserId int64, ttl time.Duration, scope string) (*Token, 
 // Insert() adds the data for a specific token to the tokens table.
 func (m TokenModel) Insert(token *Token) error {
 	query := `
-			INSERT INTO tokens (hash, user_id, expire, scope)
+			INSERT INTO tokens (hash, user_id, expiry, scope)
 			VALUES ($1, $2, $3, $4)`
 
-	args := []interface{}{token.Hash, token.UserID, token.Expire, token.Scope}
+	args := []interface{}{token.Hash, token.UserID, token.Expiry, token.Scope}
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 

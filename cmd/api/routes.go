@@ -8,7 +8,7 @@ import (
 
 // Update the routes() method to return a http.Handler instead of a *httprouter.Router.
 func (app *application) routes() http.Handler {
-//func (app *application) routes() *httprouter.Router {
+	//func (app *application) routes() *httprouter.Router {
 	// Initialize a new httprouter router instance.
 	router := httprouter.New()
 
@@ -35,6 +35,7 @@ func (app *application) routes() http.Handler {
 	router.HandlerFunc(http.MethodDelete, "/v1/movies/:id", app.deleteMovieHandler)
 	// Add the route for the POST /v1/users endpoint.
 	router.HandlerFunc(http.MethodPost, "/v1/users", app.registerUserHandler)
-
+	// Add the route for the PUT /v1/users/activated endpoint.
+	router.HandlerFunc(http.MethodPut, "/v1/users/activated", app.activateUserHandler)
 	return app.recoverPanic(app.rateLimit(router))
 }
