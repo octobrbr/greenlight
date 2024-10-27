@@ -3,8 +3,10 @@ package main
 import (
 	"context"
 	"database/sql"
+	"expvar"
 	"flag"
 	"os"
+	"runtime"
 	"strings"
 	"sync"
 	"time"
@@ -134,6 +136,25 @@ func main() {
 
 	// Likewise use the PrintInfo() method to write a message at the INFO level.
 	logger.PrintInfo("database connection pool established", nil)
+
+	// Publish a new "version" variable in the expvar handler containing our application
+	// version number (currently the constant "1.0.0").
+	expvar.NewString("version").Set(version)
+
+	// Publish the number of active goroutines.
+	expvar.Publish("goroutines", expvar.Func(func() interface{} {
+		return runtime.NumGoroutine()
+	}))
+
+	// Publish the database connection pool statistics.
+	expvar.Publish("database", expvar.Func(func() interface{} {
+		return db.Stats()
+	}))
+
+	// Publish the current Unix timestamp.
+	expvar.Publish("timestamp", expvar.Func(func() interface{} {
+		return time.Now().Unix()
+	}))
 
 	// Declare an instance of the application struct, containing the config struct and
 	// the logger.
