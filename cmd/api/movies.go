@@ -14,10 +14,10 @@ import (
 // return a plain-text placeholder response.
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
 	var input struct {
-		Title   string       `json: "title"`
-		Year    int32        `json: "year"`
-		Runtime data.Runtime `json: "runtime"`
-		Genres  []string     `json: "genres"`
+		Title   string       `js:"title"`
+		Year    int32        `js:"year"`
+		Runtime data.Runtime `js:"runtime"`
+		Genres  []string     `js:"genres"`
 	}
 
 	err := app.readJSON(w, r, &input)
@@ -121,10 +121,10 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 
 	// Use pointers for the Title, Year and Runtime fields
 	var input struct {
-		Title   *string       `json: "title"`
-		Year    *int32        `json: "year"`
-		Runtime *data.Runtime `json: "runtime"`
-		Genres  []string      `json: "genres"`
+		Title   *string       `js:"title"`
+		Year    *int32        `js:"year"`
+		Runtime *data.Runtime `js:"runtime"`
+		Genres  []string      `js:"genres"`
 	}
 
 	// Read the JSON request body data into the input struct.

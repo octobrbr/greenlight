@@ -36,7 +36,7 @@ func main() {
 	// Make the server address configurable at runtime via a command-line flag.
 	addr := flag.String("addr", ":9000", "Server address")
 	flag.Parse()
-	
+
 	log.Printf("starting server on %s", *addr)
 
 	// Start a HTTP server listening on the given address, which responds to all
